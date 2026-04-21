@@ -16,6 +16,7 @@ import { AppContext } from "../context/AppContext";
 import api, { BASE_URL } from "../services/api";
 
 const REMEMBER_KEY = "executive_remember_user";
+const AUTH_KEY = "executive_auth";
 
 export function Login() {
   const { setUser, setCredentials, showSnack } = useContext(AppContext);
@@ -67,6 +68,20 @@ export function Login() {
         token: data.token,
         expiration: data.expiration,
       });
+
+      try {
+        localStorage.setItem(
+          AUTH_KEY,
+          JSON.stringify({
+            username: data.username,
+            userid: data.userid,
+            token: data.token,
+            expiration: data.expiration,
+          }),
+        );
+      } catch (error) {
+        console.warn("No se pudo guardar auth", error);
+      }
 
       showSnack("¡Bienvenido! Sesión iniciada correctamente.");
       history.push("/app/inicio");

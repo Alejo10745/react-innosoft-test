@@ -117,7 +117,7 @@ export function ConsultaClientes() {
             onClick={() => history.push("/app/clientes/nuevo")}
             style={{ borderRadius: 25, fontWeight: 700, whiteSpace: "nowrap" }}
           >
-            + Agregar
+            Agregar
           </Button>
           <Button
             variant="outlined"

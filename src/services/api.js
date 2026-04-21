@@ -1,9 +1,9 @@
 import axios from "axios";
 
-export const BASE_URL = process.env.BACKEND_URL;
+export const BASE_URL = process.env.REACT_APP_BACKEND_URL || "";
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BASE_URL || undefined,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -16,6 +16,19 @@ const _state = {
 
 export const updateApiState = (updates) => {
   Object.assign(_state, updates);
+  try {
+    if (_state.token) {
+      api.defaults.headers.common.Authorization = `Bearer ${_state.token}`;
+      axios.defaults.headers.common.Authorization = `Bearer ${_state.token}`;
+    } else {
+      delete api.defaults.headers.common.Authorization;
+      try {
+        delete axios.defaults.headers.common.Authorization;
+      } catch (e) {}
+    }
+  } catch (ERROR) {
+    console.warn("Error actualizando estado de API", ERROR);
+  }
 };
 
 let isRefreshing = false;
@@ -70,6 +83,21 @@ api.interceptors.response.use(
 
         _state.token = data.token;
         if (_state.onRefresh) _state.onRefresh(data);
+
+        // Actualizar headers por defecto en `api` y `axios` global.
+        try {
+          if (data.token) {
+            api.defaults.headers.common.Authorization = `Bearer ${data.token}`;
+            axios.defaults.headers.common.Authorization = `Bearer ${data.token}`;
+          } else {
+            delete api.defaults.headers.common.Authorization;
+            try {
+              delete axios.defaults.headers.common.Authorization;
+            } catch (e) {}
+          }
+        } catch (e) {
+          // no-op
+        }
 
         processQueue(null, data.token);
         original.headers.Authorization = `Bearer ${data.token}`;
